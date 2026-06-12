@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Sign In — FlixStream{% endblock %}
+
+{% block content %}
+<div class="auth-page d-flex align-items-center justify-content-center" style="min-height:100vh;background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;">
+  <div class="auth-card card bg-dark-glass border-0 shadow-lg p-4 p-md-5 rounded-3" style="width:100%;max-width:440px;">
+
+    <div class="text-center mb-4">
+      <span class="brand-logo fs-1 d-block mb-2">FlixStream</span>
+      <h2 class="text-white fw-bold">Sign In</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+      <div class="mb-3">
+        <input type="email" class="form-control form-control-lg bg-dark border-secondary text-white auth-input"
+               name="email" placeholder="Email address"
+               value="{{ request.form.get('email', '') }}" required autofocus />
+      </div>
+      <div class="mb-3">
+        <div class="input-group">
+          <input type="password" class="form-control form-control-lg bg-dark border-secondary text-white auth-input"
+                 name="password" id="passwordField" placeholder="Password" required />
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('passwordField', this)">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="remember" id="remember">
+          <label class="form-check-label text-muted" for="remember">Remember me</label>
+        </div>
+        <a href="#" class="text-muted text-decoration-none small">Forgot password?</a>
+      </div>
+      <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold">Sign In</button>
+    </form>
+
+    <div class="text-center mt-4">
+      <span class="text-muted">New to FlixStream?</span>
+      <a href="{{ url_for('auth.signup') }}" class="text-white fw-bold ms-1 text-decoration-none">Sign up now.</a>
+    </div>
+
+    <hr class="border-secondary my-4" />
+    <p class="text-muted text-center small mb-1">Demo Credentials:</p>
+    <div class="row g-2 text-center small">
+      <div class="col-6">
+        <div class="bg-dark rounded p-2">
+          <div class="text-warning fw-bold">Admin</div>
+          <div class="text-muted">admin@netflix.com</div>
+          <div class="text-muted">admin123</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="bg-dark rounded p-2">
+          <div class="text-info fw-bold">Demo User</div>
+          <div class="text-muted">demo@netflix.com</div>
+          <div class="text-muted">demo123</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePassword(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

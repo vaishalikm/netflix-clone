@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ movie.title }} — FlixStream{% endblock %}
+{% block description %}{{ movie.description[:160] }}{% endblock %}
+
+{% block content %}
+<div style="padding-top:70px;">
+
+  <!-- Hero Banner -->
+  <div class="detail-hero position-relative" style="background:linear-gradient(to right, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.2)), url('{{ movie.thumbnail }}') center/cover no-repeat; min-height:65vh; display:flex; align-items:center;">
+    <div class="container-fluid px-4 px-md-5 py-5">
+      <div class="row">
+        <div class="col-lg-5 col-md-7">
+          <div class="genre-pill mb-3">{{ movie.genre }}</div>
+          <h1 class="display-4 fw-black text-white mb-3">{{ movie.title }}</h1>
+          <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+            <span class="text-success fw-bold">{{ "%.0f"|format(movie.rating * 10) }}% Match</span>
+            <span class="rating-badge"><i class="bi bi-star-fill text-warning me-1"></i>{{ "%.1f"|format(movie.rating) }}</span>
+            <span class="text-muted">{{ movie.year }}</span>
+            <span class="text-muted">{{ movie.duration }}</span>
+            <span class="badge bg-secondary">HD</span>
+          </div>
+          <p class="text-light lead mb-5">{{ movie.description }}</p>
+
+          <div class="d-flex gap-3 flex-wrap">
+            <a href="{{ url_for('movies.watch', movie_id=movie.id) }}" class="btn btn-light btn-lg px-4 fw-bold">
+              <i class="bi bi-play-fill me-2"></i>Play
+            </a>
+            {% if current_user.is_authenticated %}
+              {% if in_watchlist %}
+              <form action="{{ url_for('watchlist.remove_from_watchlist', movie_id=movie.id) }}" method="POST" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-lg px-4">
+                  <i class="bi bi-check-lg me-2"></i>In My List
+                </button>
+              </form>
+              {% else %}
+              <form action="{{ url_for('watchlist.add_to_watchlist', movie_id=movie.id) }}" method="POST" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-lg px-4">
+                  <i class="bi bi-plus-lg me-2"></i>My List
+                </button>
+              </form>
+              {% endif %}
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
+              <i class="bi bi-plus-lg me-2"></i>My List
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Section -->
+  <div class="container-fluid px-4 px-md-5 py-5">
+    <div class="row g-5">
+      <div class="col-lg-8">
+        <h3 class="text-white mb-4">About This Movie</h3>
+        <p class="text-light fs-5 lh-lg">{{ movie.description }}</p>
+
+        <div class="row g-3 mt-3">
+          <div class="col-sm-6">
+            <div class="detail-meta-card rounded p-3">
+              <div class="text-muted small mb-1">Genre</div>
+              <div class="text-white fw-semibold">{{ movie.genre }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-meta-card rounded p-3">
+              <div class="text-muted small mb-1">Year</div>
+              <div class="text-white fw-semibold">{{ movie.year }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-meta-card rounded p-3">
+              <div class="text-muted small mb-1">Duration</div>
+              <div class="text-white fw-semibold">{{ movie.duration }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-meta-card rounded p-3">
+              <div class="text-muted small mb-1">Rating</div>
+              <div class="text-white fw-semibold">
+                <i class="bi bi-star-fill text-warning me-1"></i>{{ "%.1f"|format(movie.rating) }} / 10
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="thumbnail-card rounded overflow-hidden shadow-lg">
+          <img src="{{ movie.thumbnail }}" alt="{{ movie.title }}" class="w-100" style="aspect-ratio:2/3;object-fit:cover;"
+               onerror="this.src='https://via.placeholder.com/400x600/141414/666?text=No+Poster'" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    {% if recommendations %}
+    <div class="mt-5">
+      <h3 class="text-white mb-4">More Like This</h3>
+      <div class="row g-3">
+        {% for rec in recommendations %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+          <div class="movie-card position-relative rounded overflow-hidden" data-movie-id="{{ rec.id }}">
+            <a href="{{ url_for('movies.movie_detail', movie_id=rec.id) }}" class="d-block">
+              <img src="{{ rec.thumbnail }}" alt="{{ rec.title }}" class="movie-thumb w-100"
+                   loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'" />
+            </a>
+            <div class="movie-overlay">
+              <div class="overlay-content">
+                <div class="d-flex gap-2 mb-1">
+                  <a href="{{ url_for('movies.watch', movie_id=rec.id) }}" class="btn btn-light btn-sm rounded-circle p-0 play-btn">
+                    <i class="bi bi-play-fill fs-6"></i>
+                  </a>
+                </div>
+                <div class="text-white fw-semibold small text-truncate">{{ rec.title }}</div>
+                <div class="text-muted small">{{ rec.year }}</div>
+              </div>
+            </div>
+            <div class="position-absolute top-0 start-0 m-1">
+              <span class="badge bg-danger small">{{ "%.1f"|format(rec.rating) }} <i class="bi bi-star-fill" style="font-size:0.6rem"></i></span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

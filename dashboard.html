@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}My Watchlist — FlixStream{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-md-5" style="padding-top:90px;min-height:80vh;">
+
+  <div class="d-flex align-items-center justify-content-between mb-5">
+    <div>
+      <h1 class="text-white fw-bold">My List</h1>
+      <p class="text-muted">{{ movies|length }} title{% if movies|length != 1 %}s{% endif %} saved</p>
+    </div>
+    <a href="{{ url_for('movies.index') }}" class="btn btn-outline-light">
+      <i class="bi bi-plus-lg me-2"></i>Browse More
+    </a>
+  </div>
+
+  {% if movies %}
+  <div class="row g-3">
+    {% for movie in movies %}
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+      <div class="movie-card position-relative rounded overflow-hidden" data-movie-id="{{ movie.id }}">
+        <a href="{{ url_for('movies.movie_detail', movie_id=movie.id) }}" class="d-block">
+          <img src="{{ movie.thumbnail }}" alt="{{ movie.title }}" class="movie-thumb w-100"
+               loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'" />
+        </a>
+        <div class="movie-overlay">
+          <div class="overlay-content">
+            <div class="d-flex gap-2 mb-2">
+              <a href="{{ url_for('movies.watch', movie_id=movie.id) }}" class="btn btn-light btn-sm rounded-circle p-0 play-btn">
+                <i class="bi bi-play-fill fs-6"></i>
+              </a>
+              <button class="btn btn-dark btn-sm rounded-circle p-0 watchlist-btn in-list"
+                      data-movie-id="{{ movie.id }}" title="Remove from My List">
+                <i class="bi bi-check-lg"></i>
+              </button>
+            </div>
+            <div class="text-white fw-semibold small text-truncate">{{ movie.title }}</div>
+            <div class="d-flex gap-1 mt-1">
+              <span class="genre-tag">{{ movie.genre }}</span>
+              <span class="text-muted small">{{ movie.year }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="position-absolute top-0 start-0 m-1">
+          <span class="badge bg-danger small">{{ "%.1f"|format(movie.rating) }} <i class="bi bi-star-fill" style="font-size:0.6rem"></i></span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-bookmark-heart display-1 text-muted mb-4 d-block"></i>
+    <h3 class="text-white mb-3">Your list is empty</h3>
+    <p class="text-muted mb-4">Save movies and shows you want to watch here. Look for the <i class="bi bi-plus-circle"></i> icon on any title.</p>
+    <a href="{{ url_for('movies.index') }}" class="btn btn-danger btn-lg px-5">
+      <i class="bi bi-play-fill me-2"></i>Browse Movies
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

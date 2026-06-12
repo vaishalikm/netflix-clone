@@ -1,0 +1,47 @@
+<!-- Movie Card Component -->
+<div class="movie-card position-relative rounded overflow-hidden" data-movie-id="{{ movie.id }}">
+  <!-- Thumbnail -->
+  <a href="{{ url_for('movies.movie_detail', movie_id=movie.id) }}" class="d-block">
+    <img src="{{ movie.thumbnail or 'https://via.placeholder.com/300x450/141414/e50914?text=' ~ movie.title|urlencode }}"
+         alt="{{ movie.title }}"
+         class="movie-thumb w-100"
+         loading="lazy"
+         onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'" />
+  </a>
+
+  <!-- Hover Overlay -->
+  <div class="movie-overlay">
+    <div class="overlay-content">
+      <div class="d-flex gap-2 mb-2">
+        <a href="{{ url_for('movies.watch', movie_id=movie.id) }}" class="btn btn-light btn-sm rounded-circle p-0 play-btn" title="Play">
+          <i class="bi bi-play-fill fs-5"></i>
+        </a>
+        {% if current_user.is_authenticated %}
+        <button class="btn btn-dark btn-sm rounded-circle p-0 watchlist-btn {% if movie.id in watchlist_ids %}in-list{% endif %}"
+                data-movie-id="{{ movie.id }}"
+                title="{% if movie.id in watchlist_ids %}Remove from My List{% else %}Add to My List{% endif %}">
+          <i class="bi {% if movie.id in watchlist_ids %}bi-check-lg{% else %}bi-plus-lg{% endif %}"></i>
+        </button>
+        {% endif %}
+        <a href="{{ url_for('movies.movie_detail', movie_id=movie.id) }}" class="btn btn-dark btn-sm rounded-circle p-0 ms-auto info-btn" title="More Info">
+          <i class="bi bi-chevron-down"></i>
+        </a>
+      </div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="text-success fw-bold small">{{ "%.0f"|format(movie.rating * 10) }}% Match</span>
+        <span class="border border-secondary text-muted small px-1">HD</span>
+        <span class="text-muted small">{{ movie.duration }}</span>
+      </div>
+      <div class="text-white fw-semibold small text-truncate">{{ movie.title }}</div>
+      <div class="d-flex gap-1 mt-1 flex-wrap">
+        <span class="genre-tag">{{ movie.genre }}</span>
+        <span class="text-muted small">{{ movie.year }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Badge -->
+  <div class="position-absolute top-0 start-0 m-1">
+    <span class="badge bg-danger small">{{ "%.1f"|format(movie.rating) }} <i class="bi bi-star-fill" style="font-size:0.6rem"></i></span>
+  </div>
+</div>

@@ -1,16 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Netflix Clone</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+{% extends "base.html" %}
+{% block title %}FlixStream — Watch Unlimited Movies{% endblock %}
+
+{% block content %}
+
+<!-- Hero Carousel -->
+{% if featured %}
+<div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+  <div class="carousel-inner">
+    {% for movie in featured %}
+    <div class="carousel-item {% if loop.first %}active{% endif %}">
+      <div class="hero-slide" style="background-image: linear-gradient(to right, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.1)), url('{{ movie.thumbnail }}');">
+        <div class="container-fluid px-4 px-md-5 hero-content">
+          <div class="row align-items-center" style="min-height:88vh;">
+            <div class="col-lg-5 col-md-7">
+              <div class="hero-badge mb-3">
+                <i class="bi bi-fire text-danger me-1"></i>
+                <span class="text-white fw-bold">{{ "#" ~ loop.index }} in FlixStream Today</span>
+              </div>
+              <h1 class="display-3 fw-black text-white mb-3 hero-title">{{ movie.title }}</h1>
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="rating-badge"><i class="bi bi-star-fill text-warning me-1"></i>{{ "%.1f"|format(movie.rating) }}</span>
+                <span class="text-muted">{{ movie.year }}</span>
+                <span class="text-muted">{{ movie.duration }}</span>
+                <span class="genre-pill">{{ movie.genre }}</span>
+              </div>
+              <p class="text-light lead mb-4 hero-desc">{{ movie.description[:180] }}{% if movie.description|length > 180 %}...{% endif %}</p>
+              <div class="d-flex gap-3 flex-wrap">
+                <a href="{{ url_for('movies.watch', movie_id=movie.id) }}" class="btn btn-light btn-lg px-4 fw-bold">
+                  <i class="bi bi-play-fill me-2"></i>Play
+                </a>
+                <a href="{{ url_for('movies.movie_detail', movie_id=movie.id) }}" class="btn btn-outline-light btn-lg px-4">
+                  <i class="bi bi-info-circle me-2"></i>More Info
+                </a>
+                {% if current_user.is_authenticated %}
+                <button class="btn btn-dark btn-lg px-3 watchlist-btn {% if movie.id in watchlist_ids %}in-list{% endif %}"
+                        data-movie-id="{{ movie.id }}"
+                        title="{% if movie.id in watchlist_ids %}Remove from My List{% else %}Add to My List{% endif %}">
+                  <i class="bi {% if movie.id in watchlist_ids %}bi-check-lg{% else %}bi-plus-lg{% endif %}"></i>
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Carousel Controls -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+
+  <!-- Indicators -->
+  <div class="carousel-indicators" style="bottom:30px">
+    {% for movie in featured %}
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Content Rows -->
+<div class="content-rows px-3 px-md-4" style="margin-top:-80px;position:relative;z-index:10;">
+
+  <!-- Trending Now -->
+  {% if trending %}
+  <section class="movie-row mb-5">
+    <h2 class="row-title mb-3">
+      <i class="bi bi-fire text-danger me-2"></i>Trending Now
+    </h2>
+    <div class="movie-scroll-container">
+      <div class="movie-scroll d-flex gap-3" id="trending-scroll">
+        {% for movie in trending %}
+        <div class="movie-card-wrapper">
+          {% include '_movie_card.html' %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Genre Rows -->
+  {% for section in genres_with_movies %}
+  <section class="movie-row mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="row-title mb-0">{{ section.genre }}</h2>
+      <a href="{{ url_for('movies.genre', genre_name=section.genre) }}" class="see-all-link">
+        See all <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
+    <div class="movie-scroll-container">
+      <div class="movie-scroll d-flex gap-3">
+        {% for movie in section.movies %}
+        <div class="movie-card-wrapper">
+          {% include '_movie_card.html' %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+
+</div>
+{% endblock %}

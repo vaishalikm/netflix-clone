@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Search — FlixStream{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-md-5" style="padding-top:90px;min-height:80vh;">
+
+  <!-- Search Header -->
+  <div class="mb-5">
+    <form action="{{ url_for('movies.search') }}" method="GET" class="row g-3 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text bg-dark border-secondary text-white">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="search" class="form-control bg-dark border-secondary text-white"
+                 name="q" placeholder="Search movies, genres..." value="{{ query }}" autofocus />
+          <button class="btn btn-danger px-4" type="submit">Search</button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select name="genre" class="form-select bg-dark border-secondary text-white" onchange="this.form.submit()">
+          <option value="">All Genres</option>
+          {% for g in genres %}
+          <option value="{{ g }}" {% if genre_filter == g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  {% if query or genre_filter %}
+  <div class="mb-4">
+    <h2 class="text-white">
+      {% if movies %}
+        {{ movies|length }} result{% if movies|length != 1 %}s{% endif %}
+        {% if query %}for "<span class="text-danger">{{ query }}</span>"{% endif %}
+        {% if genre_filter %}in <span class="text-danger">{{ genre_filter }}</span>{% endif %}
+      {% else %}
+        No results found
+        {% if query %}for "<span class="text-danger">{{ query }}</span>"{% endif %}
+      {% endif %}
+    </h2>
+  </div>
+
+  {% if movies %}
+  <div class="row g-3">
+    {% for movie in movies %}
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+      <div class="movie-card position-relative rounded overflow-hidden" data-movie-id="{{ movie.id }}">
+        <a href="{{ url_for('movies.movie_detail', movie_id=movie.id) }}" class="d-block">
+          <img src="{{ movie.thumbnail }}" alt="{{ movie.title }}" class="movie-thumb w-100"
+               loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'" />
+        </a>
+        <div class="movie-overlay">
+          <div class="overlay-content">
+            <div class="d-flex gap-2 mb-2">
+              <a href="{{ url_for('movies.watch', movie_id=movie.id) }}" class="btn btn-light btn-sm rounded-circle p-0 play-btn">
+                <i class="bi bi-play-fill fs-6"></i>
+              </a>
+              {% if current_user.is_authenticated %}
+              <button class="btn btn-dark btn-sm rounded-circle p-0 watchlist-btn {% if movie.id in watchlist_ids %}in-list{% endif %}"
+                      data-movie-id="{{ movie.id }}" title="My List">
+                <i class="bi {% if movie.id in watchlist_ids %}bi-check-lg{% else %}bi-plus-lg{% endif %}"></i>
+              </button>
+              {% endif %}
+            </div>
+            <div class="text-white fw-semibold small text-truncate">{{ movie.title }}</div>
+            <div class="d-flex gap-1 mt-1">
+              <span class="genre-tag">{{ movie.genre }}</span>
+              <span class="text-muted small">{{ movie.year }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="position-absolute top-0 start-0 m-1">
+          <span class="badge bg-danger small">{{ "%.1f"|format(movie.rating) }} <i class="bi bi-star-fill" style="font-size:0.6rem"></i></span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-film display-1 text-muted mb-4 d-block"></i>
+    <h4 class="text-white mb-2">No movies found</h4>
+    <p class="text-muted">Try a different search term or browse by genre.</p>
+    <a href="{{ url_for('movies.index') }}" class="btn btn-outline-light mt-3">Back to Home</a>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- Genre browse when no search -->
+  <div>
+    <h2 class="text-white mb-4">Browse by Genre</h2>
+    <div class="row g-3">
+      {% for g in genres %}
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <a href="{{ url_for('movies.genre', genre_name=g) }}" class="genre-browse-card text-decoration-none d-flex align-items-center justify-content-center rounded fw-bold text-white">
+          {{ g }}
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
